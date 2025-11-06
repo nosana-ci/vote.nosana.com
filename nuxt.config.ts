@@ -21,13 +21,4 @@ export default defineNuxtConfig({
     classSuffix: "-mode",
     storageKey: "nuxt-color-mode",
   },
-  vite: {
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: '@use "@/assets/styles/variables.scss" as *;',
-        },
-      },
-    },
-  },
-})
+});
