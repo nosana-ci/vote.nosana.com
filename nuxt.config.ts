@@ -11,6 +11,9 @@ export default defineNuxtConfig({
       "Space Grotesk": [400],
     },
   },
+   dir: {
+    public: "static",
+  },
   colorMode: {
     preference: "light", // default value of $colorMode.preference
     fallback: "light", // fallback value if not system preference found
