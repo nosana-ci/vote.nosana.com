@@ -1,9 +1,10 @@
 <template>
   <div>
-    <div class="container">
+    <div class="container my-5">
       <section class="section">
         <div class="columns is-variable is-6">
           <div class="column is-8">
+            <div class="has-text-grey">NNP-0001</div>
             <h1 class="title is-1 mb-5">
               From Yield to Growth: Aligning NOS Rewards with Real Usage
             </h1>

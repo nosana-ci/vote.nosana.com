@@ -1,8 +1,8 @@
 <template>
-  <nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-spaced has-background-white" role="navigation" aria-label="main navigation">
     <div class="container">
       <div class="navbar-brand">
-        <a class="navbar-item title is-5 mb-0"> NOSANA </a>
+        <Logo />
       </div>
 
       <div id="navMenu" class="navbar-menu is-active">
