@@ -1,5 +1,18 @@
 <template>
   <div>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-menu is-active">
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <ClientOnly>
+                <Wallets />
+              </ClientOnly>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
     <div class="container">
       <section class="section">
         <h1 class="title is-1">Voting UI</h1>

@@ -13,8 +13,10 @@
   "dependencies": {
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/google-fonts": "^3.2.0",
+    "@solana/wallet-adapter-wallets": "^0.19.37",
     "bulma": "^1.0.4",
     "nuxt": "^4.2.0",
+    "solana-wallets-vue": "^0.7.1",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"
   },
