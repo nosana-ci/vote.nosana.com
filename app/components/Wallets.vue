@@ -12,10 +12,10 @@
             aria-controls="wallet-dropdown-menu"
             @click="toggleDropdown"
           >
-          <img v-if="wallet.adapter.icon" :src="wallet.adapter.icon" :alt="wallet.adapter.name + ' icon'" class="wallet-icon" />
+          <img v-if="wallet.adapter.icon" :src="wallet.adapter.icon" :alt="wallet.adapter.name + ' icon'" class="wallet-icon mr-2" />
           <WalletIcon v-else />
             <span>{{ shortAddress }}</span>
-            <span style="margin-left: 0.25rem;">▼</span>
+            <span class="ml-1">▼</span>
           </button>
         </div>
         <div class="dropdown-menu" id="wallet-dropdown-menu" role="menu">

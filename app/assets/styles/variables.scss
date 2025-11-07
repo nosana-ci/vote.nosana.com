@@ -1,43 +1,81 @@
 $family-primary: '"Outfit", sans-serif';
-$primary: black;
+$title-family: 'Space Grotesk', sans-serif;
+$subtitle-family: '"Outfit", sans-serif';
+
+$primary: #0f0f0f;
 $secondary: #10E80C;
 $info: #0066FF;
 $success: #04DE00;
 $warning: #FFB800;
 $link: $secondary;
+$text: #333;
 $grey-dark: #666666;
 $grey-light: #999999;
-$body-background-color: hsl(221, 14%, 98%);
+
+$body-background-color: #f5f5f5;
+$box-background-color: #ffffff;
+$body-background-color-dark: #181818;
+
 $control-border-width: 2px;
 $input-shadow: none;
-$text: #333;
+
+$button-border-width: $control-border-width;
+$button-radius: 8px;
+$button-padding-vertical: 0.9rem;
+$button-padding-horizontal: 1.1rem;
+
+$radius: 8px;
+$radius-large: 10px;
+$box-radius: $radius-large;
+
+$navbar-background-color: transparent;
+$navbar-item-color: $grey-dark;
+$navbar-item-hover-color: $primary;
+$navbar-item-active-color: $primary;
+$navbar-item-hover-background-color: transparent;
+$navbar-padding-vertical: 1rem;
+$navbar-padding-horizontal: 0rem;
+
+$footer-background-color: transparent;
+$footer-color: $grey-dark;
+$footer-padding: 2rem 0;
+
 $custom-colors: (
   'secondary': $secondary,
 );
-$title-family: 'Space Grotesk', sans-serif;
-$subtitle-family: 'Space Grotesk', sans-serif;
-$body-background-color: #f5f5f5;
-$body-background-color-dark: #181818;
-$box-background-color: #fff;
 
 @use "bulma/sass" with (
   $family-primary: $family-primary,
-  $grey-dark: $grey-dark,
-  $grey-light: $grey-light,
+  $title-family: $title-family,
+  $subtitle-family: $subtitle-family,
+
   $primary: $primary,
   $link: $link,
   $info: $info,
   $success: $success,
   $warning: $warning,
-  $control-border-width: $control-border-width,
-  $input-shadow: $input-shadow,
+  $text: $text,
+  $grey-dark: $grey-dark,
+  $grey-light: $grey-light,
   $custom-colors: $custom-colors,
-  $title-family: $title-family,
-  $subtitle-family: $subtitle-family,
+
   $body-background-color: $body-background-color,
   $box-background-color: $box-background-color,
   $title-color: $primary,
   $subtitle-color: $primary,
-  $text: $text,
   $box-color: $text,
+
+  $control-border-width: $control-border-width,
+  $input-shadow: $input-shadow,
+  $button-border-width: $button-border-width,
+  $button-padding-vertical: $button-padding-vertical,
+  $button-padding-horizontal: $button-padding-horizontal,
+
+  $radius: $radius,
+  $radius-large: $radius-large,
+  $box-radius: $box-radius,
+
+  $footer-background-color: $footer-background-color,
+  $footer-color: $footer-color,
+  $footer-padding: $footer-padding,
 );
