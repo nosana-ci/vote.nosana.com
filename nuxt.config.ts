@@ -14,6 +14,14 @@ export default defineNuxtConfig({
    dir: {
     public: "static",
   },
+  runtimeConfig: {
+    public: {
+      apiUrl:
+        process.env.API_URL || (process.env.APP_ENV === "production"
+          ? 'https://voting-distributor.k8s.prd.nos.ci'
+          : "https://voting-distributor.k8s.dev.nos.ci"),
+    },
+  },
   colorMode: {
     preference: "light", // default value of $colorMode.preference
     fallback: "light", // fallback value if not system preference found

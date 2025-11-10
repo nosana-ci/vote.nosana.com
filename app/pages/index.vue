@@ -4,7 +4,7 @@
       <section class="section">
         <div class="columns is-variable is-6">
           <div class="column is-8">
-            <div class="has-text-grey">NNP-0001</div>
+            <div class="has-text-grey">NNP-0001: Tokenomics</div>
             <h1 class="title is-1 mb-5">
               From Yield to Growth: Aligning NOS Rewards with Real Usage
             </h1>
@@ -34,7 +34,12 @@
                 class="is-flex is-justify-content-space-between is-align-items-center mb-5"
               >
                 <h2 class="title is-5 mb-0">Cast Your Vote</h2>
-                <div class="has-text-grey" v-if="votingStatus === 'active' || votingStatus === 'upcoming'">
+                <div
+                  class="has-text-grey"
+                  v-if="
+                    votingStatus === 'active' || votingStatus === 'upcoming'
+                  "
+                >
                   Voting Power:
                   <template v-if="isEligible">{{
                     claimInfo?.claimable_amount
@@ -112,11 +117,13 @@
                   <div class="mt-5">
                     <button
                       class="button is-primary has-text-white"
+                      :class="{ 'is-loading': voteLoading }"
                       :disabled="
                         !selectedOption ||
                         !isEligible ||
                         eligibilityLoading ||
-                        votingStatus !== 'active'
+                        votingStatus !== 'active' ||
+                        voteLoading
                       "
                       @click="onVote(claimInfo)"
                     >
@@ -129,6 +136,14 @@
                       This wallet is not eligible to vote.
                     </p>
                     <p
+                      v-else-if="
+                        connected && !eligibilityLoading && eligibilityError
+                      "
+                      class="has-text-grey mt-3"
+                    >
+                      {{ eligibilityError }}
+                    </p>
+                    <p
                       v-if="
                         connected &&
                         !eligibilityLoading &&
@@ -139,6 +154,19 @@
                     >
                       Voting as {{ publicKey?.toBase58() }}
                     </p>
+
+                    <div
+                      class="notification is-success is-light mt-3"
+                      v-if="voteSuccess"
+                    >
+                      Vote cast successfully!
+                    </div>
+                    <div
+                      class="notification is-danger is-light mt-3"
+                      v-if="voteError"
+                    >
+                      Voting failed: {{ voteError }}
+                    </div>
                   </div>
                 </template>
               </ClientOnly>
@@ -155,9 +183,12 @@
 import { ref, computed, watch } from "vue";
 import { useWallet, WalletMultiButton } from "solana-wallets-vue";
 
-const API_URL = "";
+const API_URL = useRuntimeConfig().public.apiUrl;
 const { connected } = useWallet();
 const selectedOption = ref<string | null>(null);
+const voteLoading = ref(false);
+const voteError = ref<string | null>(null);
+const voteSuccess = ref(false);
 
 // Unix timestamps
 // November 17, 2025 12:00 CET (11:00 UTC)
@@ -202,14 +233,29 @@ const isEligible = computed(
   () => !!claimInfo.value && claimInfo.value?.claimable_amount > 0
 );
 
-const onVote = (eligibility: ClaimInfo | null) => {
+const onVote = async (eligibility: ClaimInfo | null) => {
   console.log(eligibility);
   console.log(selectedOption.value);
-  if (selectedOption.value === "yes") {
-    console.log("yes");
-  } else if (selectedOption.value === "no") {
-    console.log("no");
+  voteLoading.value = true;
+  try {
+    if (selectedOption.value === "yes") {
+      console.log("yes");
+    } else if (selectedOption.value === "no") {
+      console.log("no");
+    }
+
+    // refresh eligibility
+    // fetchEligibility(publicKey.value?.toBase58() || "");
+    // voteSuccess.value = true;
+    // temp
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  } catch (err: any) {
+    console.error(err);
+    voteError.value = err.message;
+    voteSuccess.value = false;
   }
+  await fetchEligibility(publicKey.value?.toBase58() || "");
+  voteLoading.value = false;
 };
 
 const { publicKey } = useWallet();
