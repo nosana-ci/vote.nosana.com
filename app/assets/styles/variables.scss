@@ -11,6 +11,8 @@ $link: $secondary;
 $text: #333;
 $grey-dark: #666666;
 $grey-light: #999999;
+$grey-lighter: #E0E0E0;
+$grey-lightest: #F5F5F5;
 
 $body-background-color: #f5f5f5;
 $box-background-color: #ffffff;
@@ -20,12 +22,13 @@ $control-border-width: 2px;
 $input-shadow: none;
 
 $button-border-width: $control-border-width;
-$button-radius: 8px;
 $button-padding-vertical: 0.9rem;
 $button-padding-horizontal: 1.1rem;
+$button-family: $title-family;
 
 $radius: 8px;
-$radius-large: 10px;
+$radius-medium: 16px;
+$radius-large: 20px;
 $box-radius: $radius-large;
 
 $navbar-background-color: transparent;
@@ -70,11 +73,12 @@ $custom-colors: (
   $button-border-width: $button-border-width,
   $button-padding-vertical: $button-padding-vertical,
   $button-padding-horizontal: $button-padding-horizontal,
+  $button-family: $button-family,
 
   $radius: $radius,
   $radius-large: $radius-large,
   $box-radius: $box-radius,
-  $box-padding: 1.5rem,
+  $box-padding: 1.7rem,
 
   $footer-background-color: $footer-background-color,
   $footer-color: $footer-color,

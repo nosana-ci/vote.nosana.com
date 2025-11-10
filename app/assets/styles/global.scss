@@ -1,1 +1,47 @@
 @import "variables.scss";
+
+.box {
+  border: 1px solid $grey-lighter;
+}
+
+.button {
+  border-radius: 32px;
+  min-width: 150px;
+}
+
+.option-card {
+  display: block;
+  background-color: $box-background-color;
+  border: 1px solid $grey-lighter;
+  border-radius: $radius-medium;
+  padding: 1rem 1.2rem;
+  transition: border-color 0.15s ease;
+}
+
+.option-card.is-selected {
+  border-color: $primary;
+}
+
+.custom-wallet-button .swv-button-trigger {
+  justify-content: center !important;
+  background-color: $primary !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 32px !important;
+  padding: $button-padding-vertical $button-padding-horizontal !important;
+  min-width: 150px !important;
+  font-family: $button-family !important;
+  height: auto !important;
+  line-height: 24px !important;
+}
+
+.custom-wallet-button .swv-button-trigger:hover {
+  background-color: darken($primary, 7%) !important;
+  color: #fff !important;
+}
+
+.custom-wallet-button .swv-button-trigger:disabled,
+.custom-wallet-button .swv-button-trigger[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
