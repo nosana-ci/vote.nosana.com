@@ -11,6 +11,7 @@
     "lint": "echo todo: implement linting"
   },
   "dependencies": {
+    "@nosana/kit": "^1.0.3",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@solana/wallet-adapter-wallets": "^0.19.37",

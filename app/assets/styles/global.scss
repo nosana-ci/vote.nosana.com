@@ -4,9 +4,24 @@
   border: 1px solid $grey-lighter;
 }
 
+.navbar {
+  border-bottom: 1px solid $grey-lighter;
+}
+
+.footer {
+  border-top: 1px solid $grey-lighter;
+}
+
 .button {
   border-radius: 32px;
   min-width: 150px;
+  &.is-light {
+    background-color: transparent;
+    border: 1px solid $grey-lighter;
+    &:hover {
+      background-color: #fff;
+    }
+  }
 }
 
 .option-card {

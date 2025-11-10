@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer has-background-white">
+  <footer class="footer has-background-white py-6">
     <div class="container">
       <div class="is-flex is-justify-content-space-between is-align-items-center">
         <div class="has-text-grey">© 2025 NOSANA Governance</div>
@@ -16,5 +16,3 @@ const scrollToTop = () => {
   }
 };
 </script>
-
-

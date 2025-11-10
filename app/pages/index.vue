@@ -14,9 +14,19 @@
               returning demand, so every NOS spent helps the network grow.
             </p>
             <div class="mb-5">
-              <button class="button is-light">
-                View Full Proposal <span class="ml-2">→</span>
-              </button>
+              <a
+                href="https://github.com/nosana-ci/network-proposals/blob/main/nnp/NNP-0001-tokenomics.md"
+                target="_blank"
+                class="button is-light"
+              >
+                View Full Proposal
+                <img
+                  style="width: 16px; height: 16px"
+                  src="~/assets/img/arrow-right.svg"
+                  alt="Arrow Right"
+                  class="ml-2"
+                />
+              </a>
             </div>
 
             <div class="box">
@@ -24,42 +34,69 @@
                 class="is-flex is-justify-content-space-between is-align-items-center mb-5"
               >
                 <h2 class="title is-5 mb-0">Cast Your Vote</h2>
-                <div class="has-text-grey">
+                <div class="has-text-grey" v-if="votingStatus === 'active' || votingStatus === 'upcoming'">
                   Voting Power:
-                  <template v-if="isEligible">{{ claimInfo?.claimable_amount ? (claimInfo?.claimable_amount / 1e6).toFixed(4) : '—' }}</template>
+                  <template v-if="isEligible">{{
+                    claimInfo?.claimable_amount
+                      ? (claimInfo?.claimable_amount / 1e6).toFixed(2)
+                      : "—"
+                  }}</template>
                   <template v-else>—</template>
                 </div>
               </div>
 
-              <div class="field pt-2">
-                <label class="option-card is-clickable" :class="{ 'is-selected': selectedOption === 'yes' }">
-                  <div class="is-flex is-align-items-center">
-                    <input
-                      class="mr-3"
-                      type="radio"
-                      name="vote"
-                      value="yes"
-                      v-model="selectedOption"
-                    />
-                    <span>Yes — Adopt the updated NOS reward model</span>
-                  </div>
-                </label>
-              </div>
+              <template v-if="votingStatus === 'active'">
+                <div class="field pt-2">
+                  <label
+                    class="option-card is-clickable"
+                    :class="{ 'is-selected': selectedOption === 'yes' }"
+                  >
+                    <div class="is-flex is-align-items-center">
+                      <input
+                        class="mr-3"
+                        type="radio"
+                        name="vote"
+                        value="yes"
+                        v-model="selectedOption"
+                      />
+                      <span>Yes — Adopt the updated NOS reward model</span>
+                    </div>
+                  </label>
+                </div>
 
-              <div class="field">
-                <label class="option-card is-clickable" :class="{ 'is-selected': selectedOption === 'no' }">
-                  <div class="is-flex is-align-items-center">
-                    <input
-                      class="mr-3"
-                      type="radio"
-                      name="vote"
-                      value="no"
-                      v-model="selectedOption"
-                    />
-                    <span>No — Keep the current reward model</span>
-                  </div>
-                </label>
-              </div>
+                <div class="field">
+                  <label
+                    class="option-card is-clickable"
+                    :class="{ 'is-selected': selectedOption === 'no' }"
+                  >
+                    <div class="is-flex is-align-items-center">
+                      <input
+                        class="mr-3"
+                        type="radio"
+                        name="vote"
+                        value="no"
+                        v-model="selectedOption"
+                      />
+                      <span>No — Keep the current reward model</span>
+                    </div>
+                  </label>
+                </div>
+              </template>
+              <template v-else-if="votingStatus === 'upcoming'">
+                <div class="mt-5">
+                  <p class="has-text-grey mt-3">
+                    Voting has not started yet. Please wait until November 17,
+                    12:00 CET.
+                  </p>
+                </div>
+              </template>
+              <template v-else-if="votingStatus === 'ended'">
+                <div class="mt-5">
+                  <p class="has-text-grey mt-3">
+                    Voting has ended. Results will be published soon.
+                  </p>
+                </div>
+              </template>
               <ClientOnly>
                 <template v-if="!connected">
                   <div class="mt-5 custom-wallet-button">
@@ -71,62 +108,43 @@
                     </p>
                   </div>
                 </template>
-                <template v-else>
+                <template v-else-if="votingStatus === 'active'">
                   <div class="mt-5">
                     <button
                       class="button is-primary has-text-white"
-                      :disabled="!selectedOption || !isEligible || eligibilityLoading"
+                      :disabled="
+                        !selectedOption ||
+                        !isEligible ||
+                        eligibilityLoading ||
+                        votingStatus !== 'active'
+                      "
                       @click="onVote(claimInfo)"
                     >
                       Vote
                     </button>
                     <p
                       v-if="connected && !eligibilityLoading && !isEligible"
+                      class="has-text-grey mt-3"
+                    >
+                      This wallet is not eligible to vote.
+                    </p>
+                    <p
+                      v-if="
+                        connected &&
+                        !eligibilityLoading &&
+                        isEligible &&
+                        votingStatus === 'active'
+                      "
                       class="has-text-grey is-size-7 mt-3"
-                      >This wallet is not eligible to vote.</p
                     >
-                    <p v-if="connected && !eligibilityLoading && isEligible" class="has-text-grey is-size-7 mt-3"
-                      >Voting as {{ publicKey?.toBase58() }}</p
-                    >
+                      Voting as {{ publicKey?.toBase58() }}
+                    </p>
                   </div>
                 </template>
               </ClientOnly>
             </div>
           </div>
-          <div class="column is-4">
-            <div class="box">
-              <h3 class="title is-5">Progress</h3>
-              <div class="is-size-7 has-text-grey">Votes cast —</div>
-              <div class="notification is-light mt-3 is-size-7" style="background-color: #F5F5F5;">
-                Vote distribution will be shown after the voting period closes.
-              </div>
-            </div>
-
-            <div class="box">
-              <h3 class="title is-5">Status</h3>
-              <div class="is-flex is-align-items-center mb-2">
-                <span class="tag is-success is-light mr-2">Active</span>
-              </div>
-              <dl class="is-size-7">
-                <div class="is-flex is-justify-content-space-between mb-2">
-                  <dt>Opens</dt>
-                  <dd>November 17, 12:00 CET</dd>
-                </div>
-                <div class="is-flex is-justify-content-space-between mb-2">
-                  <dt>Closes</dt>
-                  <dd>November 21, 12:00 CET</dd>
-                </div>
-                <div class="is-flex is-justify-content-space-between mb-2">
-                  <dt>Results published</dt>
-                  <dd>November 21, 18:00 CET</dd>
-                </div>
-                <div class="is-flex is-justify-content-space-between">
-                  <dt>Snapshot</dt>
-                  <dd>November 13, 12:00 CET</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
+          <Sidebar :votingStatus="votingStatus" />
         </div>
       </section>
     </div>
@@ -140,6 +158,24 @@ import { useWallet, WalletMultiButton } from "solana-wallets-vue";
 const API_URL = "";
 const { connected } = useWallet();
 const selectedOption = ref<string | null>(null);
+
+// Unix timestamps
+// November 17, 2025 12:00 CET (11:00 UTC)
+const VOTING_START_TS = new Date("2025-11-17T12:00:00Z").getTime() / 1000;
+// November 21, 2025 12:00 CET (11:00 UTC)
+const VOTING_END_TS = new Date("2025-11-21T12:00:00Z").getTime() / 1000;
+
+const votingStatus = computed(() => {
+  const now = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  if (now < VOTING_START_TS) {
+    return "upcoming";
+  } else if (now >= VOTING_START_TS && now < VOTING_END_TS) {
+    return "active";
+  } else {
+    return "ended";
+  }
+});
 
 type ClaimInfo = {
   claimant: string;
@@ -162,29 +198,33 @@ const eligibilityLoading = ref(false);
 const eligibilityError = ref<string | null>(null);
 const claimInfo = ref<ClaimInfo | null>(null);
 
-const isEligible = computed(() => !!claimInfo.value && claimInfo.value?.claimable_amount > 0);
+const isEligible = computed(
+  () => !!claimInfo.value && claimInfo.value?.claimable_amount > 0
+);
 
 const onVote = (eligibility: ClaimInfo | null) => {
   console.log(eligibility);
   console.log(selectedOption.value);
-  if (selectedOption.value === 'yes') {
-    console.log('yes');
-  } else {
-    console.log('no');
+  if (selectedOption.value === "yes") {
+    console.log("yes");
+  } else if (selectedOption.value === "no") {
+    console.log("no");
   }
 };
 
 const { publicKey } = useWallet();
-
 
 async function fetchEligibility(pubkeyBase58: string) {
   eligibilityLoading.value = true;
   eligibilityError.value = null;
   claimInfo.value = null;
   try {
-    const data = await $fetch<ClaimInfo>(`${API_URL}/eligibility/${pubkeyBase58}`, {
-      method: "GET",
-    });
+    const data = await $fetch<ClaimInfo>(
+      `${API_URL}/eligibility/${pubkeyBase58}`,
+      {
+        method: "GET",
+      }
+    );
     claimInfo.value = data;
   } catch (err: any) {
     // 404 is not eligible
