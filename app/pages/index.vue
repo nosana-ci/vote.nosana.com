@@ -90,9 +90,9 @@
               >
                 <div class="mt-5">
                   <p class="has-text-grey mt-3">
-                    Voting has not started yet. Please wait until November 17,
-                    12:00 CET. You can connect your wallet to check your voting
-                    power.
+                    Voting has not started yet. Please wait until
+                    {{ formatCETDate(publicRuntimeConfig.votingStartIso) }}. You
+                    can connect your wallet to check your voting power.
                   </p>
                 </div>
               </template>
@@ -105,7 +105,7 @@
               >
                 <div class="mt-5">
                   <p class="has-text-grey mt-3">
-                    Voting has ended. Results will be published soon.
+                    Voting has ended.
                   </p>
                 </div>
               </template>
@@ -114,9 +114,10 @@
                   <div class="mt-5 custom-wallet-button">
                     <WalletMultiButton />
                     <p class="has-text-grey is-size-7 mt-3">
-                      Connect the same wallet that held NOS at the snapshot (Nov
-                      13, 12:00 CET). Once your vote is cast, it is final and
-                      cannot be changed.
+                      Connect the same wallet that held NOS at the snapshot ({{
+                        formatCETDate(publicRuntimeConfig.snapshotIso)
+                      }}). Once your vote is cast, it is final and cannot be
+                      changed.
                     </p>
                   </div>
                 </template>
@@ -207,8 +208,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useWallet, WalletMultiButton } from "solana-wallets-vue";
+import formatCETDate from "~/utils/formatDate";
 
-const API_URL = useRuntimeConfig().public.apiUrl;
+const publicRuntimeConfig = useRuntimeConfig().public;
+const API_URL = publicRuntimeConfig.apiUrl;
 const { connected } = useWallet();
 const selectedOption = ref<string | null>(null);
 const voteLoading = ref(false);
@@ -219,11 +222,11 @@ const claimStatusLoading = ref(false);
 const claimStatusError = ref<string | null>(null);
 const claimStatus = ref<any | null>(null);
 
-// Unix timestamps
-// November 17, 2025 12:00 CET (11:00 UTC)
-const VOTING_START_TS = new Date("2025-11-17T12:00:00Z").getTime() / 1000;
-// November 21, 2025 12:00 CET (11:00 UTC)
-const VOTING_END_TS = new Date("2025-11-21T12:00:00Z").getTime() / 1000;
+// Unix timestamps for voting start and end
+const VOTING_START_TS =
+  new Date(publicRuntimeConfig.votingStartIso).getTime() / 1000;
+const VOTING_END_TS =
+  new Date(publicRuntimeConfig.votingEndIso).getTime() / 1000;
 
 const votingStatus = computed(() => {
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
