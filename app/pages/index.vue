@@ -22,6 +22,11 @@
                       ? (eligibilityInfo?.claimable_amount / 1e6).toFixed(2)
                       : "—"
                   }}</template>
+                  <template v-else-if="hasVoted">
+                    {{ eligibilityInfo?.claimed_amount
+                      ? (eligibilityInfo?.claimed_amount / 1e6).toFixed(2)
+                      : "—" }}
+                  </template>
                   <template v-else>—</template>
                 </div>
               </div>
@@ -104,9 +109,7 @@
                 "
               >
                 <div class="mt-5">
-                  <p class="has-text-grey mt-3">
-                    Voting has ended.
-                  </p>
+                  <p class="has-text-grey mt-3">Voting has ended.</p>
                 </div>
               </template>
               <ClientOnly>
@@ -192,6 +195,18 @@
                     <div class="notification is-success is-light">
                       Thank you for voting! Your vote has been cast
                       successfully.
+                      <p v-if="votedFor === 'yes'" class="mt-2">
+                        You voted:
+                        <span class="has-text-weight-semibold">
+                          Yes — Adopt the updated NOS reward model
+                        </span>
+                      </p>
+                      <p v-else-if="votedFor === 'no'" class="mt-2">
+                        You voted:
+                        <span class="has-text-weight-semibold">
+                          No — Keep the current reward model
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </template>
@@ -221,6 +236,8 @@ const hasVoted = ref(false);
 const claimStatusLoading = ref(false);
 const claimStatusError = ref<string | null>(null);
 const claimStatus = ref<any | null>(null);
+const votedFor = ref<"yes" | "no" | null>(null);
+const voteDetailsLoading = ref(false);
 
 // Unix timestamps for voting start and end
 const VOTING_START_TS =
@@ -366,6 +383,8 @@ watch(
 async function checkClaimStatus() {
   claimStatusLoading.value = true;
   claimStatusError.value = null;
+  voteDetailsLoading.value = false;
+  votedFor.value = null;
   try {
     hasVoted.value = false;
     claimStatus.value = null;
@@ -383,12 +402,81 @@ async function checkClaimStatus() {
     );
     claimStatus.value = status;
     hasVoted.value = status !== null;
-    console.log("status", status);
+    console.log("claim status", status);
+    if (status) {
+      await fetchVoteDetails(status, client);
+    }
   } catch (e: any) {
     claimStatusError.value = e.message;
     console.error(e);
   } finally {
     claimStatusLoading.value = false;
+  }
+}
+
+async function fetchVoteDetails(status: any, client: any) {
+  voteDetailsLoading.value = true;
+  votedFor.value = null;
+  try {
+    const statusAddress = status?.address;
+    if (!statusAddress) {
+      throw new Error("Missing claim status address");
+    }
+
+    const signaturesResponse = await client.solana.rpc
+      .getSignaturesForAddress(statusAddress)
+      .send();
+
+    const signaturesList = Array.isArray(signaturesResponse?.value)
+      ? signaturesResponse.value
+      : signaturesResponse;
+
+    if (!Array.isArray(signaturesList) || signaturesList.length === 0) {
+      console.error("No vote transactions found.");
+      return;
+    }
+
+    const claimSignatureInfo = signaturesList[signaturesList.length - 1];
+    const claimSignature = claimSignatureInfo?.signature;
+
+    if (!claimSignature) {
+      return;
+    }
+
+    const transactionResponse = await client.solana.rpc
+      .getTransaction(claimSignature, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      })
+      .send();
+
+    const yesAddress = publicRuntimeConfig.yesAddress;
+    const noAddress = publicRuntimeConfig.noAddress;
+
+    // check changes balances in the transaction
+    const postBalances = Array.isArray(
+      transactionResponse?.meta?.postTokenBalances
+    )
+      ? transactionResponse.meta.postTokenBalances
+      : [];
+
+    // find match with yes or no address in the post balances
+    const match = postBalances.find((balance: any) => {
+      const owner = balance?.owner;
+      return owner === yesAddress || owner === noAddress;
+    });
+
+    if (match?.owner === yesAddress) {
+      votedFor.value = "yes";
+    } else if (match?.owner === noAddress) {
+      votedFor.value = "no";
+    } else {
+      console.error("Unable to determine vote option from transaction.");
+    }
+  } catch (err: any) {
+    console.error("Failed to load vote details:", err);
+  } finally {
+    voteDetailsLoading.value = false;
   }
 }
 
