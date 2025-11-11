@@ -23,8 +23,6 @@ export default defineNuxtConfig({
       noAddress: 'NopXntmRdXhYNkoZaNTMUMShJ3aVG5RvwpiyPdd4bMh',
       // UTC timestamps, will be converted to CET in the interface
       snapshotIso: '2025-11-13T11:00:00Z',
-      votingStartIso: '2025-11-17T11:00:00Z',
-      votingEndIso: '2025-11-21T11:00:00Z',
       resultsPublishedIso: '2025-11-21T17:00:00Z'
     },
   }

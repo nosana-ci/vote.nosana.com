@@ -8,32 +8,35 @@
       <div
         class="notification is-light mt-3 is-size-7"
         style="background-color: #f5f5f5"
-        v-if="
-          votingStatus !== 'ended' ||
-          Date.now() / 1000 <
-            new Date(publicRuntimeConfig.resultsPublishedIso).getTime() / 1000
-        "
+        v-if="votingStatus !== 'ended'"
       >
         Vote distribution will be shown after the voting period closes.
       </div>
 
       <!-- if the current time is after the results published time & voting status is ended -->
       <dl
-        class="is-size-7 mt-3"
-        v-if="
-          votingStatus === 'ended' &&
-          Date.now() / 1000 >
-            new Date(publicRuntimeConfig.resultsPublishedIso).getTime() / 1000
-        "
+        class="results-summary is-size-7 mt-3"
+        v-if="votingStatus === 'ended'"
       >
-        <p class="has-text-grey">Votes cast</p>
-        <div class="is-flex is-justify-content-space-between mb-2">
+        <p class="has-text-grey mb-2">Votes cast</p>
+        <div
+          class="vote-row is-flex is-justify-content-space-between mb-2"
+          :class="{
+            'vote-row--winner has-background-success-light':
+              winningChoice === 'yes',
+          }"
+        >
           <dt>Yes</dt>
-          <dd>{{ yesVotesDisplay }}</dd>
+          <dd class="has-text-weight-semibold">{{ yesVotesDisplay }}</dd>
         </div>
-        <div class="is-flex is-justify-content-space-between">
+        <div
+          class="vote-row is-flex is-justify-content-space-between"
+          :class="{
+            'vote-row--winner': winningChoice === 'no',
+          }"
+        >
           <dt>No</dt>
-          <dd>{{ noVotesDisplay }}</dd>
+          <dd class="has-text-weight-semibold">{{ noVotesDisplay }}</dd>
         </div>
       </dl>
     </div>
@@ -78,6 +81,8 @@ import { Connection, PublicKey } from "@solana/web3.js";
 
 const props = defineProps<{
   votingStatus: string;
+  votingStartIso?: string;
+  votingEndIso?: string;
 }>();
 
 import { onMounted, ref, computed } from "vue";
@@ -94,24 +99,32 @@ const TOKEN_MINT = publicRuntimeConfig.token as string;
 
 const statusDates = computed(() => ({
   snapshot: formatCETDate(publicRuntimeConfig.snapshotIso),
-  opens: formatCETDate(publicRuntimeConfig.votingStartIso),
-  closes: formatCETDate(publicRuntimeConfig.votingEndIso),
+  opens: formatCETDate(props.votingStartIso),
+  closes: formatCETDate(props.votingEndIso),
   results: formatCETDate(publicRuntimeConfig.resultsPublishedIso),
 }));
 
 const yesVotesDisplay = computed(() => {
   if (loadingVotes.value && yesVotes.value === null) return "Loading…";
   if (loadError.value) return "—";
-  return yesVotes.value !== null
-    ? yesVotes.value.toFixed(0).toLocaleString()
-    : "—";
+  return yesVotes.value?.toFixed(0).toLocaleString() || "—";
 });
 const noVotesDisplay = computed(() => {
   if (loadingVotes.value && noVotes.value === null) return "Loading…";
   if (loadError.value) return "—";
-  return noVotes.value !== null
-    ? noVotes.value.toFixed(0).toLocaleString()
-    : "—";
+  return noVotes.value?.toFixed(0).toLocaleString() || "—";
+});
+
+const winningChoice = computed<"yes" | "no" | null>(() => {
+  if (
+    yesVotes.value === null ||
+    noVotes.value === null ||
+    loadError.value ||
+    loadingVotes.value
+  ) {
+    return null;
+  }
+  return yesVotes.value > noVotes.value ? "yes" : "no";
 });
 
 async function fetchVoteTotals() {
@@ -170,6 +183,19 @@ onMounted(() => {
 });
 </script>
 <style scoped lang="scss">
+.vote-row {
+  border: 1px solid var(--bulma-border, #e6e6e6);
+  border-radius: var(--bulma-radius-large, 20px);
+  padding: 0.55rem 0.75rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.vote-row--winner {
+  border-color: currentColor;
+  box-shadow: 0 0 0 1px currentColor;
+}
+
 .status-dot {
   display: inline-block;
   width: 8px;

@@ -31,189 +31,202 @@
                 </div>
               </div>
 
-              <template
-                v-if="
-                  votingStatus === 'active' &&
-                  !hasVoted &&
-                  !claimStatusError &&
-                  !eligibilityError &&
-                  (!connected || (eligibilityInfo && !claimStatusLoading))
-                "
+              <div
+                class="notification is-danger is-light mb-4"
+                v-if="distributorLoadErrorMessage"
               >
-                <div class="field pt-2">
-                  <label
-                    class="option-card is-clickable"
-                    :class="{ 'is-selected': selectedOption === 'yes' }"
-                  >
-                    <div class="is-flex is-align-items-center">
-                      <input
-                        class="mr-3"
-                        type="radio"
-                        name="vote"
-                        value="yes"
-                        v-model="selectedOption"
-                      />
-                      <span>Yes — Adopt the updated NOS reward model</span>
-                    </div>
-                  </label>
-                </div>
+                {{ distributorLoadErrorMessage }}
+              </div>
 
-                <div class="field">
-                  <label
-                    class="option-card is-clickable"
-                    :class="{ 'is-selected': selectedOption === 'no' }"
-                  >
-                    <div class="is-flex is-align-items-center">
-                      <input
-                        class="mr-3"
-                        type="radio"
-                        name="vote"
-                        value="no"
-                        v-model="selectedOption"
-                      />
-                      <span>No — Keep the current reward model</span>
-                    </div>
-                  </label>
-                </div>
-              </template>
-              <template v-else-if="eligibilityError || claimStatusError">
-                <div class="mt-5">
-                  <p class="has-text-grey mt-3">
-                    {{ eligibilityError || claimStatusError }}
-                  </p>
-                </div>
-              </template>
-              <template
-                v-else-if="
-                  votingStatus === 'upcoming' &&
-                  (!connected ||
-                    (eligibilityInfo &&
-                      !claimStatusLoading &&
-                      !eligibilityLoading &&
-                      !hasVoted))
-                "
-              >
-                <div class="mt-5">
-                  <p class="has-text-grey mt-3">
-                    Voting has not started yet. Please wait until
-                    {{ formatCETDate(publicRuntimeConfig.votingStartIso) }}. You
-                    can connect your wallet to check your voting power.
-                  </p>
-                </div>
-              </template>
-              <template
-                v-else-if="
-                  votingStatus === 'ended' &&
-                  (!connected ||
-                    (eligibilityInfo && !claimStatusLoading && !hasVoted))
-                "
-              >
-                <div class="mt-5">
-                  <p class="has-text-grey mt-3">Voting has ended.</p>
-                </div>
-              </template>
-              <ClientOnly>
-                <template v-if="!connected">
-                  <div class="mt-5 custom-wallet-button">
-                    <WalletMultiButton />
-                    <p class="has-text-grey is-size-7 mt-3">
-                      Connect the same wallet that held NOS at the snapshot ({{
-                        formatCETDate(publicRuntimeConfig.snapshotIso)
-                      }}). Once your vote is cast, it is final and cannot be
-                      changed.
+              <div v-else>
+                <template
+                  v-if="
+                    votingStatus === 'active' &&
+                    !hasVoted &&
+                    !claimStatusError &&
+                    !eligibilityError &&
+                    (!connected || (eligibilityInfo && !claimStatusLoading))
+                  "
+                >
+                  <div class="field pt-2">
+                    <label
+                      class="option-card is-clickable"
+                      :class="{ 'is-selected': selectedOption === 'yes' }"
+                    >
+                      <div class="is-flex is-align-items-center">
+                        <input
+                          class="mr-3"
+                          type="radio"
+                          name="vote"
+                          value="yes"
+                          v-model="selectedOption"
+                        />
+                        <span>Yes — Adopt the updated NOS reward model</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="option-card is-clickable"
+                      :class="{ 'is-selected': selectedOption === 'no' }"
+                    >
+                      <div class="is-flex is-align-items-center">
+                        <input
+                          class="mr-3"
+                          type="radio"
+                          name="vote"
+                          value="no"
+                          v-model="selectedOption"
+                        />
+                        <span>No — Keep the current reward model</span>
+                      </div>
+                    </label>
+                  </div>
+                </template>
+                <template v-else-if="eligibilityError || claimStatusError">
+                  <div class="mt-5">
+                    <p class="has-text-grey mt-3">
+                      {{ eligibilityError || claimStatusError }}
                     </p>
                   </div>
                 </template>
                 <template
                   v-else-if="
-                    votingStatus === 'active' &&
-                    !hasVoted &&
-                    !eligibilityError &&
-                    !claimStatusError &&
-                    !claimStatusLoading &&
-                    !eligibilityLoading
+                    votingStatus === 'upcoming' &&
+                    (!connected ||
+                      (eligibilityInfo &&
+                        !claimStatusLoading &&
+                        !eligibilityLoading &&
+                        !hasVoted))
                   "
                 >
                   <div class="mt-5">
-                    <button
-                      class="button is-primary has-text-white"
-                      :class="{ 'is-loading': voteLoading }"
-                      :disabled="
-                        !selectedOption ||
-                        !isEligible ||
-                        eligibilityLoading ||
-                        claimStatusLoading ||
-                        votingStatus !== 'active' ||
-                        voteLoading
-                      "
-                      @click="onVote(eligibilityInfo)"
-                    >
-                      Vote
-                    </button>
-                    <p
-                      v-if="connected && !eligibilityLoading && !isEligible"
-                      class="has-text-grey mt-3"
-                    >
-                      This wallet is not eligible to vote.
+                    <p class="has-text-grey mt-3">
+                      Voting has not started yet. Please wait until
+                      {{ formatCETDate(votingStartIso ?? undefined) }}. You
+                      can connect your wallet to check your voting power.
                     </p>
-                    <p
-                      v-else-if="
-                        connected && !eligibilityLoading && eligibilityError
-                      "
-                      class="has-text-grey mt-3"
-                    >
-                      {{ eligibilityError }}
-                    </p>
-                    <p
-                      v-if="
-                        connected &&
-                        !eligibilityLoading &&
-                        isEligible &&
-                        votingStatus === 'active'
-                      "
-                      class="has-text-grey is-size-7 mt-3"
-                    >
-                      Voting as {{ publicKey?.toBase58() }}
-                    </p>
-
-                    <div
-                      class="notification is-success is-light mt-3"
-                      v-if="voteSuccess"
-                    >
-                      Vote cast successfully!
-                    </div>
-                    <div
-                      class="notification is-danger is-light mt-3"
-                      v-if="voteError"
-                    >
-                      Voting failed: {{ voteError }}
-                    </div>
                   </div>
                 </template>
-                <template v-else-if="connected && hasVoted">
+                <template
+                  v-else-if="
+                    votingStatus === 'ended' &&
+                    (!connected ||
+                      (eligibilityInfo && !claimStatusLoading && !hasVoted))
+                  "
+                >
                   <div class="mt-5">
-                    <div class="notification is-success is-light">
-                      Thank you for voting! Your vote has been cast
-                      successfully.
-                      <p v-if="votedFor === 'yes'" class="mt-2">
-                        You voted:
-                        <span class="has-text-weight-semibold">
-                          Yes — Adopt the updated NOS reward model
-                        </span>
-                      </p>
-                      <p v-else-if="votedFor === 'no'" class="mt-2">
-                        You voted:
-                        <span class="has-text-weight-semibold">
-                          No — Keep the current reward model
-                        </span>
-                      </p>
-                    </div>
+                    <p class="has-text-grey mt-3">Voting has ended.</p>
                   </div>
                 </template>
-              </ClientOnly>
+                <ClientOnly>
+                  <template v-if="!connected">
+                    <div class="mt-5 custom-wallet-button">
+                      <WalletMultiButton />
+                      <p class="has-text-grey is-size-7 mt-3">
+                        Connect the same wallet that held NOS at the snapshot ({{
+                          formatCETDate(publicRuntimeConfig.snapshotIso)
+                        }}). Once your vote is cast, it is final and cannot be
+                        changed.
+                      </p>
+                    </div>
+                  </template>
+                  <template
+                    v-else-if="
+                      votingStatus === 'active' &&
+                      !hasVoted &&
+                      !eligibilityError &&
+                      !claimStatusError &&
+                      !claimStatusLoading &&
+                      !eligibilityLoading
+                    "
+                  >
+                    <div class="mt-5">
+                      <button
+                        class="button is-primary has-text-white"
+                        :class="{ 'is-loading': voteLoading }"
+                        :disabled="
+                          !selectedOption ||
+                          !isEligible ||
+                          eligibilityLoading ||
+                          claimStatusLoading ||
+                          votingStatus !== 'active' ||
+                          voteLoading
+                        "
+                        @click="onVote(eligibilityInfo)"
+                      >
+                        Vote
+                      </button>
+                      <p
+                        v-if="connected && !eligibilityLoading && !isEligible"
+                        class="has-text-grey mt-3"
+                      >
+                        This wallet is not eligible to vote.
+                      </p>
+                      <p
+                        v-else-if="
+                          connected && !eligibilityLoading && eligibilityError
+                        "
+                        class="has-text-grey mt-3"
+                      >
+                        {{ eligibilityError }}
+                      </p>
+                      <p
+                        v-if="
+                          connected &&
+                          !eligibilityLoading &&
+                          isEligible &&
+                          votingStatus === 'active'
+                        "
+                        class="has-text-grey is-size-7 mt-3"
+                      >
+                        Voting as {{ publicKey?.toBase58() }}
+                      </p>
+
+                      <div
+                        class="notification is-success is-light mt-3"
+                        v-if="voteSuccess"
+                      >
+                        Vote cast successfully!
+                      </div>
+                      <div
+                        class="notification is-danger is-light mt-3"
+                        v-if="voteError"
+                      >
+                        Voting failed: {{ voteError }}
+                      </div>
+                    </div>
+                  </template>
+                  <template v-else-if="connected && hasVoted">
+                    <div class="mt-5">
+                      <div class="notification is-success is-light">
+                        Thank you for voting! Your vote has been cast
+                        successfully.
+                        <p v-if="votedFor === 'yes'" class="mt-2">
+                          You voted:
+                          <span class="has-text-weight-semibold">
+                            Yes — Adopt the updated NOS reward model
+                          </span>
+                        </p>
+                        <p v-else-if="votedFor === 'no'" class="mt-2">
+                          You voted:
+                          <span class="has-text-weight-semibold">
+                            No — Keep the current reward model
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                </ClientOnly>
+              </div>
             </div>
           </div>
-          <Sidebar :votingStatus="votingStatus" />
+          <Sidebar
+            :votingStatus="votingStatus"
+            :voting-start-iso="votingStartIso ?? undefined"
+            :voting-end-iso="votingEndIso ?? undefined"
+          />
         </div>
       </section>
     </div>
@@ -227,6 +240,57 @@ import formatCETDate from "~/utils/formatDate";
 
 const publicRuntimeConfig = useRuntimeConfig().public;
 const API_URL = publicRuntimeConfig.apiUrl;
+
+type DistributorInfo = {
+  start_ts: number;
+  clawback_start_ts: number;
+};
+
+const {
+  data: distributorList,
+  error: distributorError,
+  pending: distributorPending,
+} = await useFetch<DistributorInfo[] | null>(`${API_URL}/distributors`);
+
+const distributorInfo = computed<DistributorInfo | null>(() =>
+  Array.isArray(distributorList.value) ? distributorList.value[0] ?? null : null
+);
+
+const votingStartTimestamp = computed<number | null>(() => {
+  const start = distributorInfo.value?.start_ts;
+  return typeof start === "number" && Number.isFinite(start) ? start : null;
+});
+
+const votingEndTimestamp = computed<number | null>(() => {
+  const end = distributorInfo.value?.clawback_start_ts;
+  return typeof end === "number" && Number.isFinite(end) ? end : null;
+});
+
+const votingStartIso = computed<string | null>(() =>
+  votingStartTimestamp.value !== null
+    ? new Date(votingStartTimestamp.value * 1000).toISOString()
+    : null
+);
+
+const votingEndIso = computed<string | null>(() =>
+  votingEndTimestamp.value !== null
+    ? new Date(votingEndTimestamp.value * 1000).toISOString()
+    : null
+);
+
+const distributorLoadErrorMessage = computed<string | null>(() => {
+  if (distributorPending.value) return null;
+  if (distributorError.value)
+    return "Failed to load voting schedule. Please try again later.";
+  if (!distributorInfo.value)
+    return "Voting schedule is currently unavailable. Please try again later.";
+  return null;
+});
+
+if (distributorError.value) {
+  console.error("Failed to load distributor data:", distributorError.value);
+}
+
 const { connected } = useWallet();
 const selectedOption = ref<string | null>(null);
 const voteLoading = ref(false);
@@ -239,17 +303,16 @@ const claimStatus = ref<any | null>(null);
 const votedFor = ref<"yes" | "no" | null>(null);
 const voteDetailsLoading = ref(false);
 
-// Unix timestamps for voting start and end
-const VOTING_START_TS =
-  new Date(publicRuntimeConfig.votingStartIso).getTime() / 1000;
-const VOTING_END_TS =
-  new Date(publicRuntimeConfig.votingEndIso).getTime() / 1000;
-
 const votingStatus = computed(() => {
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
-  if (now < VOTING_START_TS) {
+  const start = votingStartTimestamp.value;
+  const end = votingEndTimestamp.value;
+  if (start === null || end === null) {
     return "upcoming";
-  } else if (now >= VOTING_START_TS && now < VOTING_END_TS) {
+  }
+  if (now < start) {
+    return "upcoming";
+  } else if (now >= start && now < end) {
     return "active";
   } else {
     return "ended";
@@ -446,7 +509,6 @@ async function fetchVoteDetails(status: any, client: any) {
     const transactionResponse = await client.solana.rpc
       .getTransaction(claimSignature, {
         commitment: "confirmed",
-        maxSupportedTransactionVersion: 0,
       })
       .send();
 
