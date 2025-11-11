@@ -23,9 +23,11 @@
                       : "—"
                   }}</template>
                   <template v-else-if="hasVoted">
-                    {{ eligibilityInfo?.claimed_amount
-                      ? (eligibilityInfo?.claimed_amount / 1e6).toFixed(2)
-                      : "—" }}
+                    {{
+                      eligibilityInfo?.claimed_amount
+                        ? (eligibilityInfo?.claimed_amount / 1e6).toFixed(2)
+                        : "—"
+                    }}
                   </template>
                   <template v-else>—</template>
                 </div>
@@ -104,8 +106,8 @@
                   <div class="mt-5">
                     <p class="has-text-grey mt-3">
                       Voting has not started yet. Please wait until
-                      {{ formatCETDate(votingStartIso ?? undefined) }}. You
-                      can connect your wallet to check your voting power.
+                      {{ formatCETDate(votingStartIso ?? undefined) }}. You can
+                      connect your wallet to check your voting power.
                     </p>
                   </div>
                 </template>
@@ -125,9 +127,9 @@
                     <div class="mt-5 custom-wallet-button">
                       <WalletMultiButton />
                       <p class="has-text-grey is-size-7 mt-3">
-                        Connect the same wallet that held NOS at the snapshot ({{
-                          formatCETDate(publicRuntimeConfig.snapshotIso)
-                        }}). Once your vote is cast, it is final and cannot be
+                        Connect the same wallet that held NOS at the snapshot
+                        ({{ formatCETDate(publicRuntimeConfig.snapshotIso) }}).
+                        Once your vote is cast, it is final and cannot be
                         changed.
                       </p>
                     </div>
@@ -404,10 +406,6 @@ const { publicKey, wallet } = useWallet();
 // fetch eligibility info from API
 async function fetchEligibility(pubkeyBase58: string) {
   eligibilityLoading.value = true;
-  eligibilityError.value = null;
-  eligibilityInfo.value = null;
-  voteSuccess.value = false;
-  voteError.value = null;
   try {
     const data = await $fetch<EligibilityInfo>(
       `${API_URL}/eligibility/${pubkeyBase58}`,
@@ -439,6 +437,16 @@ watch(
     if (isConnected && pk) {
       const address = pk.toBase58();
       fetchEligibility(address);
+      eligibilityError.value = null;
+      eligibilityInfo.value = null;
+      voteSuccess.value = false;
+      voteError.value = null;
+      claimStatus.value = null;
+      claimStatusLoading.value = false;
+      claimStatusError.value = null;
+      voteDetailsLoading.value = false;
+      votedFor.value = null;
+      hasVoted.value = false;
     }
   },
   { immediate: true }
