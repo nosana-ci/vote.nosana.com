@@ -4,6 +4,17 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["~/assets/styles/global.scss"],
   modules: ['@nuxtjs/google-fonts'],
+  app: {
+    head: {
+      title: 'Nosana Voting - NNP-0001',
+      htmlAttrs: {
+        lang: 'en',
+      },
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
+    },
+  },
   googleFonts: {
     preload: true,
     families: {
