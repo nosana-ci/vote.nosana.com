@@ -32,7 +32,7 @@
         <div
           class="vote-row is-flex is-justify-content-space-between"
           :class="{
-            'vote-row--winner': winningChoice === 'no',
+            'vote-row--winner has-background-success-light': winningChoice === 'no',
           }"
         >
           <dt>No</dt>
@@ -83,9 +83,10 @@ const props = defineProps<{
   votingStatus: string;
   votingStartIso?: string;
   votingEndIso?: string;
+  mint?: string;
 }>();
 
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import formatCETDate from "~/utils/formatDate";
 
 const publicRuntimeConfig = useRuntimeConfig().public;
@@ -94,8 +95,6 @@ const yesVotes = ref<number | null>(null);
 const noVotes = ref<number | null>(null);
 const loadingVotes = ref<boolean>(false);
 const loadError = ref<string | null>(null);
-
-const TOKEN_MINT = publicRuntimeConfig.token as string;
 
 const statusDates = computed(() => ({
   snapshot: formatCETDate(publicRuntimeConfig.snapshotIso),
@@ -131,6 +130,11 @@ async function fetchVoteTotals() {
   loadingVotes.value = true;
   loadError.value = null;
   try {
+    if (!props.mint) {
+      // No mint available yet; skip fetching totals
+      loadingVotes.value = false;
+      return;
+    }
     const { NosanaClient } = await import("@nosana/kit");
     const client = new NosanaClient(publicRuntimeConfig.network as any);
     const rpcEndpoint = client.config.solana.rpcEndpoint;
@@ -139,12 +143,12 @@ async function fetchVoteTotals() {
       fetchVotesForOwner(
         rpcEndpoint,
         publicRuntimeConfig.yesAddress as string,
-        TOKEN_MINT
+        props.mint as string
       ),
       fetchVotesForOwner(
         rpcEndpoint,
         publicRuntimeConfig.noAddress as string,
-        TOKEN_MINT
+        props.mint as string
       ),
     ]);
     yesVotes.value = yes;
@@ -181,6 +185,15 @@ async function fetchVotesForOwner(
 onMounted(() => {
   fetchVoteTotals();
 });
+
+watch(
+  () => props.mint,
+  (newMint, oldMint) => {
+    if (newMint && newMint !== oldMint) {
+      fetchVoteTotals();
+    }
+  }
+);
 </script>
 <style scoped lang="scss">
 .vote-row {

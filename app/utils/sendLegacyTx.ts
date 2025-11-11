@@ -20,7 +20,8 @@ export async function sendLegacyTransactionViaAdapter(
   const ix = new TransactionInstruction({
     programId: new PublicKey(kitIx.programAddress),
     keys,
-    data: Buffer.from(kitIx.data),
+    // @ts-ignore
+    data: new Uint8Array(kitIx.data),
   });
 
   const tx = new Transaction({

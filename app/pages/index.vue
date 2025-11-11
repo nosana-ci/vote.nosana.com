@@ -226,6 +226,7 @@
             :votingStatus="votingStatus"
             :voting-start-iso="votingStartIso ?? undefined"
             :voting-end-iso="votingEndIso ?? undefined"
+            :mint="distributorInfo?.mint ?? undefined"
           />
         </div>
       </section>
@@ -244,6 +245,7 @@ const API_URL = publicRuntimeConfig.apiUrl;
 type DistributorInfo = {
   start_ts: number;
   clawback_start_ts: number;
+  mint: string;
 };
 
 const {

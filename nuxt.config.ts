@@ -29,7 +29,6 @@ export default defineNuxtConfig({
     public: {
       network: 'mainnet',
       apiUrl: 'https://voting-distributor.k8s.prd.nos.ci',
-      token: 'tvt6rcF7oMMaAcNW9FvfWhi6v7VxqaapdadoG6xjXUH',
       yesAddress: 'YessuvqUauj9yW4B3eERcyRLWmQtWpFc2ERKmaedmCE',
       noAddress: 'NopXntmRdXhYNkoZaNTMUMShJ3aVG5RvwpiyPdd4bMh',
       // UTC timestamps, will be converted to CET in the interface
