@@ -31,7 +31,8 @@
                   votingStatus === 'active' &&
                   !hasVoted &&
                   !claimStatusError &&
-                  !eligibilityError
+                  !eligibilityError &&
+                  (!connected || (eligibilityInfo && !claimStatusLoading))
                 "
               >
                 <div class="field pt-2">
@@ -77,15 +78,31 @@
                   </p>
                 </div>
               </template>
-              <template v-else-if="votingStatus === 'upcoming'">
+              <template
+                v-else-if="
+                  votingStatus === 'upcoming' &&
+                  (!connected ||
+                    (eligibilityInfo &&
+                      !claimStatusLoading &&
+                      !eligibilityLoading &&
+                      !hasVoted))
+                "
+              >
                 <div class="mt-5">
                   <p class="has-text-grey mt-3">
                     Voting has not started yet. Please wait until November 17,
-                    12:00 CET. You can connect your wallet to check your voting power.
+                    12:00 CET. You can connect your wallet to check your voting
+                    power.
                   </p>
                 </div>
               </template>
-              <template v-else-if="votingStatus === 'ended'">
+              <template
+                v-else-if="
+                  votingStatus === 'ended' &&
+                  (!connected ||
+                    (eligibilityInfo && !claimStatusLoading && !hasVoted))
+                "
+              >
                 <div class="mt-5">
                   <p class="has-text-grey mt-3">
                     Voting has ended. Results will be published soon.
@@ -108,7 +125,9 @@
                     votingStatus === 'active' &&
                     !hasVoted &&
                     !eligibilityError &&
-                    !claimStatusError
+                    !claimStatusError &&
+                    !claimStatusLoading &&
+                    !eligibilityLoading
                   "
                 >
                   <div class="mt-5">
@@ -119,6 +138,7 @@
                         !selectedOption ||
                         !isEligible ||
                         eligibilityLoading ||
+                        claimStatusLoading ||
                         votingStatus !== 'active' ||
                         voteLoading
                       "
@@ -167,8 +187,11 @@
                   </div>
                 </template>
                 <template v-else-if="connected && hasVoted">
-                  <div class="notification is-info is-light mt-3">
-                    You have already voted with this wallet.
+                  <div class="mt-5">
+                    <div class="notification is-success is-light">
+                      Thank you for voting! Your vote has been cast
+                      successfully.
+                    </div>
                   </div>
                 </template>
               </ClientOnly>
@@ -184,7 +207,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useWallet, WalletMultiButton } from "solana-wallets-vue";
-import toNosanaNetwork from "~/utils/nosanaKitNetworkConvert";
 
 const API_URL = useRuntimeConfig().public.apiUrl;
 const { connected } = useWallet();
@@ -205,7 +227,6 @@ const VOTING_END_TS = new Date("2025-11-21T12:00:00Z").getTime() / 1000;
 
 const votingStatus = computed(() => {
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
-
   if (now < VOTING_START_TS) {
     return "upcoming";
   } else if (now >= VOTING_START_TS && now < VOTING_END_TS) {
@@ -215,7 +236,7 @@ const votingStatus = computed(() => {
   }
 });
 
-type ClaimInfo = {
+type EligibilityInfo = {
   claimant: string;
   merkle_tree: string;
   mint: string;
@@ -234,35 +255,62 @@ type ClaimInfo = {
 
 const eligibilityLoading = ref(false);
 const eligibilityError = ref<string | null>(null);
-type EligibilityInfo = ClaimInfo;
 const eligibilityInfo = ref<EligibilityInfo | null>(null);
 
 const isEligible = computed(
-  () => !!eligibilityInfo.value && eligibilityInfo.value?.claimable_amount > 0
+  () =>
+    !!eligibilityInfo.value &&
+    eligibilityInfo.value?.claimable_amount > 0 &&
+    !eligibilityLoading.value
 );
 
 const onVote = async (eligibility: EligibilityInfo | null) => {
-  console.log(eligibility);
-  console.log(selectedOption.value);
   voteLoading.value = true;
+  voteError.value = null;
+  voteSuccess.value = false;
   try {
-    if (selectedOption.value === "yes") {
-      console.log("yes");
-    } else if (selectedOption.value === "no") {
-      console.log("no");
-    }
+    if (!connected.value || !publicKey.value || !wallet.value)
+      throw new Error("Wallet not connected");
+    if (!eligibility) throw new Error("Eligibility not loaded");
+    if (!selectedOption.value) throw new Error("Please select an option");
+    if (!isEligible.value)
+      throw new Error("This wallet is not eligible to vote");
+    if (hasVoted.value) throw new Error("This wallet has already voted");
+    if (eligibility.claimable_amount === 0)
+      throw new Error("This wallet is not eligible to vote");
 
-    // refresh eligibility
-    // fetchEligibility(publicKey.value?.toBase58() || "");
-    // voteSuccess.value = true;
-    // temp
+    const distributor = String(eligibility.merkle_tree).trim();
+    const proof = (eligibility.proof || []).map((p) => Uint8Array.from(p));
+    const amountUnlocked = eligibility.claimable_amount;
+
+    const { NosanaClient, address, ClaimTarget } = await import("@nosana/kit");
+    const client = new NosanaClient(useRuntimeConfig().public.network as any);
+    await client.setWallet(wallet.value.adapter as any);
+    const claimInstruction = await client.merkleDistributor.claim({
+      distributor: address(distributor),
+      amountUnlocked,
+      amountLocked: 0,
+      proof,
+      target: selectedOption.value === "yes" ? ClaimTarget.YES : ClaimTarget.NO,
+    });
+
+    const signature = await sendLegacyTransactionViaAdapter(
+      client.config.solana.rpcEndpoint,
+      wallet.value.adapter as any,
+      publicKey.value.toBase58(),
+      claimInstruction as any
+    );
+    console.log("Claim transaction:", signature);
+
+    // small delay before checking claim status
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    await checkClaimStatus();
+    voteSuccess.value = true;
   } catch (err: any) {
     console.error(err);
     voteError.value = err.message;
     voteSuccess.value = false;
   }
-  await fetchEligibility(publicKey.value?.toBase58() || "");
   voteLoading.value = false;
 };
 
@@ -273,6 +321,8 @@ async function fetchEligibility(pubkeyBase58: string) {
   eligibilityLoading.value = true;
   eligibilityError.value = null;
   eligibilityInfo.value = null;
+  voteSuccess.value = false;
+  voteError.value = null;
   try {
     const data = await $fetch<EligibilityInfo>(
       `${API_URL}/eligibility/${pubkeyBase58}`,
@@ -322,15 +372,9 @@ async function checkClaimStatus() {
     const distributor = eligibilityInfo.value?.merkle_tree;
     if (!distributor) throw new Error("Distributor not found");
 
-    const { NosanaClient, NosanaNetwork, address } = await import(
-      "@nosana/kit"
-    );
-    console.log("network", useRuntimeConfig().public.network);
-    const client = new NosanaClient(
-      toNosanaNetwork(useRuntimeConfig().public.network)
-    );
+    const { NosanaClient, address } = await import("@nosana/kit");
+    const client = new NosanaClient(useRuntimeConfig().public.network as any);
     await client.setWallet(wallet.value.adapter as any);
-    console.log("client", client.config);
     const status = await client.merkleDistributor.getClaimStatusForDistributor(
       address(distributor)
     );

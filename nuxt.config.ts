@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   css: ["~/assets/styles/global.scss"],
-  modules: ['@nuxtjs/google-fonts', '@nuxtjs/color-mode'],
+  modules: ['@nuxtjs/google-fonts'],
   googleFonts: {
     preload: true,
     families: {
@@ -16,24 +16,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      network:
-        process.env.SOLANA_NETWORK || (process.env.APP_ENV === "production"
-          ? 'mainnet'
-          : 'devnet'),
-      apiUrl:
-        process.env.API_URL || (process.env.APP_ENV === "production"
-          ? 'https://voting-distributor.k8s.prd.nos.ci'
-          : "https://voting-distributor.k8s.dev.nos.ci"),
+      network: 'mainnet',
+      apiUrl: 'https://voting-distributor.k8s.prd.nos.ci'
     },
-  },
-  colorMode: {
-    preference: "light", // default value of $colorMode.preference
-    fallback: "light", // fallback value if not system preference found
-    hid: "nuxt-color-mode-script",
-    globalName: "__NUXT_COLOR_MODE__",
-    componentName: "ColorScheme",
-    classPrefix: "",
-    classSuffix: "-mode",
-    storageKey: "nuxt-color-mode",
-  },
+  }
 });
