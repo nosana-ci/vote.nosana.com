@@ -31,14 +31,6 @@ $radius-medium: 16px;
 $radius-large: 20px;
 $box-radius: $radius-large;
 
-$navbar-background-color: transparent;
-$navbar-item-color: $grey-dark;
-$navbar-item-hover-color: $primary;
-$navbar-item-active-color: $primary;
-$navbar-item-hover-background-color: transparent;
-$navbar-padding-vertical: 1rem;
-$navbar-padding-horizontal: 0rem;
-
 $footer-background-color: transparent;
 $footer-color: $grey-dark;
 $footer-padding: 2rem 0;
@@ -84,5 +76,7 @@ $custom-colors: (
   $footer-color: $footer-color,
   $footer-padding: $footer-padding,
 
+  $navbar-background-color: transparent,
+  
   $tag-radius: $radius-medium
 );

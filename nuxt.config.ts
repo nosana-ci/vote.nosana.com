@@ -16,6 +16,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      network:
+        process.env.SOLANA_NETWORK || (process.env.APP_ENV === "production"
+          ? 'mainnet'
+          : 'devnet'),
       apiUrl:
         process.env.API_URL || (process.env.APP_ENV === "production"
           ? 'https://voting-distributor.k8s.prd.nos.ci'

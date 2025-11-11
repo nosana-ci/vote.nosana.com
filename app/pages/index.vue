@@ -4,31 +4,7 @@
       <section class="section">
         <div class="columns is-variable is-6">
           <div class="column is-8">
-            <div class="has-text-grey">NNP-0001: Tokenomics</div>
-            <h1 class="title is-1 mb-5">
-              From Yield to Growth: Aligning NOS Rewards with Real Usage
-            </h1>
-            <p class="subtitle is-5 has-text-grey">
-              This proposal shifts NOS rewards from passive yield to usage-based
-              incentives. The goal is to reward capacity, reliability, and
-              returning demand, so every NOS spent helps the network grow.
-            </p>
-            <div class="mb-5">
-              <a
-                href="https://github.com/nosana-ci/network-proposals/blob/main/nnp/NNP-0001-tokenomics.md"
-                target="_blank"
-                class="button is-light"
-              >
-                View Full Proposal
-                <img
-                  style="width: 16px; height: 16px"
-                  src="~/assets/img/arrow-right.svg"
-                  alt="Arrow Right"
-                  class="ml-2"
-                />
-              </a>
-            </div>
-
+            <Intro />
             <div class="box">
               <div
                 class="is-flex is-justify-content-space-between is-align-items-center mb-5"
@@ -42,15 +18,22 @@
                 >
                   Voting Power:
                   <template v-if="isEligible">{{
-                    claimInfo?.claimable_amount
-                      ? (claimInfo?.claimable_amount / 1e6).toFixed(2)
+                    eligibilityInfo?.claimable_amount
+                      ? (eligibilityInfo?.claimable_amount / 1e6).toFixed(2)
                       : "—"
                   }}</template>
                   <template v-else>—</template>
                 </div>
               </div>
 
-              <template v-if="votingStatus === 'active'">
+              <template
+                v-if="
+                  votingStatus === 'active' &&
+                  !hasVoted &&
+                  !claimStatusError &&
+                  !eligibilityError
+                "
+              >
                 <div class="field pt-2">
                   <label
                     class="option-card is-clickable"
@@ -87,11 +70,18 @@
                   </label>
                 </div>
               </template>
+              <template v-else-if="eligibilityError || claimStatusError">
+                <div class="mt-5">
+                  <p class="has-text-grey mt-3">
+                    {{ eligibilityError || claimStatusError }}
+                  </p>
+                </div>
+              </template>
               <template v-else-if="votingStatus === 'upcoming'">
                 <div class="mt-5">
                   <p class="has-text-grey mt-3">
                     Voting has not started yet. Please wait until November 17,
-                    12:00 CET.
+                    12:00 CET. You can connect your wallet to check your voting power.
                   </p>
                 </div>
               </template>
@@ -113,7 +103,14 @@
                     </p>
                   </div>
                 </template>
-                <template v-else-if="votingStatus === 'active'">
+                <template
+                  v-else-if="
+                    votingStatus === 'active' &&
+                    !hasVoted &&
+                    !eligibilityError &&
+                    !claimStatusError
+                  "
+                >
                   <div class="mt-5">
                     <button
                       class="button is-primary has-text-white"
@@ -125,7 +122,7 @@
                         votingStatus !== 'active' ||
                         voteLoading
                       "
-                      @click="onVote(claimInfo)"
+                      @click="onVote(eligibilityInfo)"
                     >
                       Vote
                     </button>
@@ -169,6 +166,11 @@
                     </div>
                   </div>
                 </template>
+                <template v-else-if="connected && hasVoted">
+                  <div class="notification is-info is-light mt-3">
+                    You have already voted with this wallet.
+                  </div>
+                </template>
               </ClientOnly>
             </div>
           </div>
@@ -182,6 +184,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useWallet, WalletMultiButton } from "solana-wallets-vue";
+import toNosanaNetwork from "~/utils/nosanaKitNetworkConvert";
 
 const API_URL = useRuntimeConfig().public.apiUrl;
 const { connected } = useWallet();
@@ -189,6 +192,10 @@ const selectedOption = ref<string | null>(null);
 const voteLoading = ref(false);
 const voteError = ref<string | null>(null);
 const voteSuccess = ref(false);
+const hasVoted = ref(false);
+const claimStatusLoading = ref(false);
+const claimStatusError = ref<string | null>(null);
+const claimStatus = ref<any | null>(null);
 
 // Unix timestamps
 // November 17, 2025 12:00 CET (11:00 UTC)
@@ -227,13 +234,14 @@ type ClaimInfo = {
 
 const eligibilityLoading = ref(false);
 const eligibilityError = ref<string | null>(null);
-const claimInfo = ref<ClaimInfo | null>(null);
+type EligibilityInfo = ClaimInfo;
+const eligibilityInfo = ref<EligibilityInfo | null>(null);
 
 const isEligible = computed(
-  () => !!claimInfo.value && claimInfo.value?.claimable_amount > 0
+  () => !!eligibilityInfo.value && eligibilityInfo.value?.claimable_amount > 0
 );
 
-const onVote = async (eligibility: ClaimInfo | null) => {
+const onVote = async (eligibility: EligibilityInfo | null) => {
   console.log(eligibility);
   console.log(selectedOption.value);
   voteLoading.value = true;
@@ -258,20 +266,21 @@ const onVote = async (eligibility: ClaimInfo | null) => {
   voteLoading.value = false;
 };
 
-const { publicKey } = useWallet();
+const { publicKey, wallet } = useWallet();
 
+// fetch eligibility info from API
 async function fetchEligibility(pubkeyBase58: string) {
   eligibilityLoading.value = true;
   eligibilityError.value = null;
-  claimInfo.value = null;
+  eligibilityInfo.value = null;
   try {
-    const data = await $fetch<ClaimInfo>(
+    const data = await $fetch<EligibilityInfo>(
       `${API_URL}/eligibility/${pubkeyBase58}`,
       {
         method: "GET",
       }
     );
-    claimInfo.value = data;
+    eligibilityInfo.value = data;
   } catch (err: any) {
     // 404 is not eligible
     const status = err?.response?.status || err?.statusCode;
@@ -280,7 +289,7 @@ async function fetchEligibility(pubkeyBase58: string) {
     } else {
       eligibilityError.value = "Failed to check eligibility. Try again later.";
     }
-    claimInfo.value = null;
+    eligibilityInfo.value = null;
   } finally {
     eligibilityLoading.value = false;
   }
@@ -291,7 +300,7 @@ watch(
   ([isConnected, pk]) => {
     // Reset on wallet change
     eligibilityError.value = null;
-    claimInfo.value = null;
+    eligibilityInfo.value = null;
     if (isConnected && pk) {
       const address = pk.toBase58();
       fetchEligibility(address);
@@ -299,4 +308,46 @@ watch(
   },
   { immediate: true }
 );
+
+// Check claim/vote status with @nosana/kit
+async function checkClaimStatus() {
+  claimStatusLoading.value = true;
+  claimStatusError.value = null;
+  try {
+    hasVoted.value = false;
+    claimStatus.value = null;
+    if (!connected.value || !publicKey.value || !wallet.value)
+      throw new Error("Wallet not connected");
+
+    const distributor = eligibilityInfo.value?.merkle_tree;
+    if (!distributor) throw new Error("Distributor not found");
+
+    const { NosanaClient, NosanaNetwork, address } = await import(
+      "@nosana/kit"
+    );
+    console.log("network", useRuntimeConfig().public.network);
+    const client = new NosanaClient(
+      toNosanaNetwork(useRuntimeConfig().public.network)
+    );
+    await client.setWallet(wallet.value.adapter as any);
+    console.log("client", client.config);
+    const status = await client.merkleDistributor.getClaimStatusForDistributor(
+      address(distributor)
+    );
+    claimStatus.value = status;
+    hasVoted.value = status !== null;
+    console.log("status", status);
+  } catch (e: any) {
+    claimStatusError.value = e.message;
+    console.error(e);
+  } finally {
+    claimStatusLoading.value = false;
+  }
+}
+
+watch(eligibilityInfo, () => {
+  if (eligibilityInfo.value) {
+    checkClaimStatus();
+  }
+});
 </script>
