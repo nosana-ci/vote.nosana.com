@@ -94,7 +94,7 @@
                   <template v-if="!connected">
                     <div class="mt-5 custom-wallet-button">
                       <WalletMultiButton />
-                      <p class="has-text-grey is-size-7 mt-3">
+                      <p class="has-text-grey is-size-6 mt-3">
                         Connect the same wallet that held NOS at the snapshot
                         ({{ formatCETDate(publicRuntimeConfig.snapshotIso) }}).
                         Once your vote is cast, it is final and cannot be

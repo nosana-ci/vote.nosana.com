@@ -1,7 +1,9 @@
 <template>
-  <div>
+  <div class="app-wrapper">
     <Topbar />
-    <NuxtPage />
+    <main class="main-content">
+      <NuxtPage />
+    </main>
     <Footer />
   </div>
 </template>
