@@ -1,10 +1,36 @@
-# Nuxt Minimal Starter
+# Nosana Voting UI
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A web application for voting on Nosana Network Proposals (NNP). This application allows eligible NOS token holders and stakers to cast their votes on governance proposals using their Solana wallets.
 
-## Setup
+## Overview
 
-Make sure to install dependencies:
+This is a Nuxt.js-based voting interface that enables token holders to participate in on-chain governance decisions. The current implementation supports voting on NNP-0001 Tokenomics proposal.
+
+## Features
+
+- Solana wallet integration for secure authentication
+- Real-time voting status tracking (upcoming, active, ended)
+- Voting power calculation based on token holdings and stake at snapshot
+- Vote casting with Yes/No options
+- Results display after voting period ends
+- Responsive design using Bulma CSS framework
+
+## Tech Stack
+
+- **Framework**: Nuxt 4
+- **Language**: TypeScript
+- **Styling**: Bulma CSS, Sass
+- **Blockchain**: Solana
+- **Fonts**: Google Fonts (Outfit, Space Grotesk)
+
+## Prerequisites
+
+- Node.js 22 or higher
+- npm, pnpm, yarn, or bun package manager
+
+## Installation
+
+Install project dependencies:
 
 ```bash
 # npm
@@ -20,7 +46,7 @@ yarn install
 bun install
 ```
 
-## Development Server
+## Development
 
 Start the development server on `http://localhost:3000`:
 
@@ -38,7 +64,7 @@ yarn dev
 bun run dev
 ```
 
-## Production
+## Building for Production
 
 Build the application for production:
 
@@ -56,7 +82,7 @@ yarn build
 bun run build
 ```
 
-Locally preview production build:
+Preview the production build locally:
 
 ```bash
 # npm
@@ -72,4 +98,35 @@ yarn preview
 bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Configuration
+
+The application configuration is managed in `nuxt.config.ts`. Key runtime configuration options include:
+
+- `network`: Solana network (mainnet/devnet)
+- `apiUrl`: Voting distributor API endpoint
+- `yesAddress`: Solana address for "Yes" votes
+- `noAddress`: Solana address for "No" votes
+- `snapshotIso`: Snapshot timestamp for eligibility determination
+- `resultsPublishedIso`: Timestamp when results are published
+
+## Project Structure
+
+```
+voting-ui/
+├── app/              # Nuxt application directory
+│   └── pages/        # Vue page components
+├── static/           # Static assets
+├── nuxt.config.ts    # Nuxt configuration
+├── package.json      # Dependencies and scripts
+└── tsconfig.json     # TypeScript configuration
+```
+
+## Deployment
+
+The build output is generated in `.output/public` directory.
+
+For more information on Nuxt deployment, see the [Nuxt deployment documentation](https://nuxt.com/docs/getting-started/deployment).
+
+## License
+
+This project is private and proprietary.
