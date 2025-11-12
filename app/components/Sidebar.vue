@@ -46,13 +46,9 @@
           <dt>Opens</dt>
           <dd>{{ statusDates.opens }}</dd>
         </div>
-        <div class="is-flex is-justify-content-space-between mb-2">
+        <div class="is-flex is-justify-content-space-between">
           <dt>Closes</dt>
           <dd>{{ statusDates.closes }}</dd>
-        </div>
-        <div class="is-flex is-justify-content-space-between">
-          <dt>Results published</dt>
-          <dd>{{ statusDates.results }}</dd>
         </div>
       </dl>
     </div>
@@ -83,18 +79,17 @@ const statusDates = computed(() => ({
   snapshot: formatCETDate(publicRuntimeConfig.snapshotIso),
   opens: formatCETDate(props.votingStartIso),
   closes: formatCETDate(props.votingEndIso),
-  results: formatCETDate(publicRuntimeConfig.resultsPublishedIso),
 }));
 
 const yesVotesDisplay = computed(() => {
   if (loadingVotes.value && yesVotes.value === null) return "Loading…";
   if (loadError.value) return "—";
-  return yesVotes.value?.toFixed(0).toLocaleString() || "—";
+  return yesVotes.value?.toLocaleString('en-US', { maximumFractionDigits: 0 }) || "—";
 });
 const noVotesDisplay = computed(() => {
   if (loadingVotes.value && noVotes.value === null) return "Loading…";
   if (loadError.value) return "—";
-  return noVotes.value?.toFixed(0).toLocaleString() || "—";
+  return noVotes.value?.toLocaleString('en-US', { maximumFractionDigits: 0 }) || "—";
 });
 
 const winningChoice = computed<"yes" | "no" | null>(() => {

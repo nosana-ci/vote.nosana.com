@@ -107,7 +107,6 @@ The application configuration is managed in `nuxt.config.ts`. Key runtime config
 - `yesAddress`: Solana address for "Yes" votes
 - `noAddress`: Solana address for "No" votes
 - `snapshotIso`: Snapshot timestamp for eligibility determination
-- `resultsPublishedIso`: Timestamp when results are published
 
 ## Project Structure
 
