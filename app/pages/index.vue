@@ -153,13 +153,13 @@
                         <p v-if="votedFor === 'yes'" class="mt-2">
                           You voted:
                           <span class="has-text-weight-semibold">
-                            Yes — Adopt the updated NOS reward model
+                            Yes — Adopt NNP-0001 Tokenomics
                           </span>
                         </p>
                         <p v-else-if="votedFor === 'no'" class="mt-2">
                           You voted:
                           <span class="has-text-weight-semibold">
-                            No — Keep the current reward model
+                            No — Reject NNP-0001 Tokenomics
                           </span>
                         </p>
                       </div>
