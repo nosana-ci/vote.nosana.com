@@ -6,20 +6,15 @@
           <div class="column is-8">
             <Intro />
             <div class="box">
-              <div
-                class="is-flex is-justify-content-space-between is-align-items-center mb-5"
-              >
+              <div class="is-flex is-justify-content-space-between is-align-items-center mb-5">
                 <h2 class="title is-5 mb-0">Cast Your Vote</h2>
-                <div
-                  class="has-text-grey"
-                  v-if="
-                    votingStatus === 'active' || votingStatus === 'upcoming'
-                  "
-                >
+                <div class="has-text-grey" v-if="
+                  votingStatus === 'active' || votingStatus === 'upcoming'
+                ">
                   Voting Power:
                   <template v-if="isEligible">{{
-                    eligibilityInfo?.claimable_amount
-                      ? (eligibilityInfo?.claimable_amount / 1e6).toFixed(2)
+                    eligibilityInfo?.end_amount
+                      ? (eligibilityInfo?.end_amount / 1e6).toFixed(2)
                       : "—"
                   }}</template>
                   <template v-else-if="hasVoted">
@@ -33,55 +28,32 @@
                 </div>
               </div>
 
-              <div
-                class="notification is-danger is-light mb-4"
-                v-if="distributorLoadErrorMessage"
-              >
+              <div class="notification is-danger is-light mb-4" v-if="distributorLoadErrorMessage">
                 {{ distributorLoadErrorMessage }}
               </div>
 
               <div v-else>
-                <template
-                  v-if="
-                    votingStatus === 'active' &&
-                    !hasVoted &&
-                    !claimStatusError &&
-                    !eligibilityError &&
-                    (!connected || (eligibilityInfo && !claimStatusLoading))
-                  "
-                >
+                <template v-if="
+                  votingStatus === 'active' &&
+                  !hasVoted &&
+                  !claimStatusError &&
+                  !eligibilityError &&
+                  (!connected || (eligibilityInfo && !claimStatusLoading))
+                ">
                   <div class="field pt-2">
-                    <label
-                      class="option-card is-clickable"
-                      :class="{ 'is-selected': selectedOption === 'yes' }"
-                    >
+                    <label class="option-card is-clickable" :class="{ 'is-selected': selectedOption === 'yes' }">
                       <div class="is-flex is-align-items-center">
-                        <input
-                          class="mr-3"
-                          type="radio"
-                          name="vote"
-                          value="yes"
-                          v-model="selectedOption"
-                        />
-                        <span>Yes — Adopt the updated NOS reward model</span>
+                        <input class="mr-3" type="radio" name="vote" value="yes" v-model="selectedOption" />
+                        <span>Yes — Adopt NNP-0001 Tokenomics</span>
                       </div>
                     </label>
                   </div>
 
                   <div class="field">
-                    <label
-                      class="option-card is-clickable"
-                      :class="{ 'is-selected': selectedOption === 'no' }"
-                    >
+                    <label class="option-card is-clickable" :class="{ 'is-selected': selectedOption === 'no' }">
                       <div class="is-flex is-align-items-center">
-                        <input
-                          class="mr-3"
-                          type="radio"
-                          name="vote"
-                          value="no"
-                          v-model="selectedOption"
-                        />
-                        <span>No — Keep the current reward model</span>
+                        <input class="mr-3" type="radio" name="vote" value="no" v-model="selectedOption" />
+                        <span>No — Reject NNP-0001 Tokenomics</span>
                       </div>
                     </label>
                   </div>
@@ -93,16 +65,14 @@
                     </p>
                   </div>
                 </template>
-                <template
-                  v-else-if="
-                    votingStatus === 'upcoming' &&
-                    (!connected ||
-                      (eligibilityInfo &&
-                        !claimStatusLoading &&
-                        !eligibilityLoading &&
-                        !hasVoted))
-                  "
-                >
+                <template v-else-if="
+                  votingStatus === 'upcoming' &&
+                  (!connected ||
+                    (eligibilityInfo &&
+                      !claimStatusLoading &&
+                      !eligibilityLoading &&
+                      !hasVoted))
+                ">
                   <div class="mt-5">
                     <p class="has-text-grey mt-3">
                       Voting has not started yet. Please wait until
@@ -111,13 +81,11 @@
                     </p>
                   </div>
                 </template>
-                <template
-                  v-else-if="
-                    votingStatus === 'ended' &&
-                    (!connected ||
-                      (eligibilityInfo && !claimStatusLoading && !hasVoted))
-                  "
-                >
+                <template v-else-if="
+                  votingStatus === 'ended' &&
+                  (!connected ||
+                    (eligibilityInfo && !claimStatusLoading && !hasVoted))
+                ">
                   <div class="mt-5">
                     <p class="has-text-grey mt-3">Voting has ended.</p>
                   </div>
@@ -134,68 +102,45 @@
                       </p>
                     </div>
                   </template>
-                  <template
-                    v-else-if="
-                      votingStatus === 'active' &&
-                      !hasVoted &&
-                      !eligibilityError &&
-                      !claimStatusError &&
-                      !claimStatusLoading &&
-                      !eligibilityLoading
-                    "
-                  >
+                  <template v-else-if="
+                    votingStatus === 'active' &&
+                    !hasVoted &&
+                    !eligibilityError &&
+                    !claimStatusError &&
+                    !claimStatusLoading &&
+                    !eligibilityLoading
+                  ">
                     <div class="mt-5">
-                      <button
-                        class="button is-primary has-text-white"
-                        :class="{ 'is-loading': voteLoading }"
-                        :disabled="
-                          !selectedOption ||
-                          !isEligible ||
-                          eligibilityLoading ||
-                          claimStatusLoading ||
-                          votingStatus !== 'active' ||
-                          voteLoading
-                        "
-                        @click="onVote(eligibilityInfo)"
-                      >
+                      <button class="button is-primary has-text-white" :class="{ 'is-loading': voteLoading }" :disabled="!selectedOption ||
+                        !isEligible ||
+                        eligibilityLoading ||
+                        claimStatusLoading ||
+                        votingStatus !== 'active' ||
+                        voteLoading
+                        " @click="onVote(eligibilityInfo)">
                         Vote
                       </button>
-                      <p
-                        v-if="connected && !eligibilityLoading && !isEligible"
-                        class="has-text-grey mt-3"
-                      >
+                      <p v-if="connected && !eligibilityLoading && !isEligible" class="has-text-grey mt-3">
                         This wallet is not eligible to vote.
                       </p>
-                      <p
-                        v-else-if="
-                          connected && !eligibilityLoading && eligibilityError
-                        "
-                        class="has-text-grey mt-3"
-                      >
+                      <p v-else-if="
+                        connected && !eligibilityLoading && eligibilityError
+                      " class="has-text-grey mt-3">
                         {{ eligibilityError }}
                       </p>
-                      <p
-                        v-if="
-                          connected &&
-                          !eligibilityLoading &&
-                          isEligible &&
-                          votingStatus === 'active'
-                        "
-                        class="has-text-grey is-size-7 mt-3"
-                      >
+                      <p v-if="
+                        connected &&
+                        !eligibilityLoading &&
+                        isEligible &&
+                        votingStatus === 'active'
+                      " class="has-text-grey is-size-7 mt-3">
                         Voting as {{ publicKey?.toBase58() }}
                       </p>
 
-                      <div
-                        class="notification is-success is-light mt-3"
-                        v-if="voteSuccess"
-                      >
+                      <div class="notification is-success is-light mt-3" v-if="voteSuccess">
                         Vote cast successfully!
                       </div>
-                      <div
-                        class="notification is-danger is-light mt-3"
-                        v-if="voteError"
-                      >
+                      <div class="notification is-danger is-light mt-3" v-if="voteError">
                         Voting failed: {{ voteError }}
                       </div>
                     </div>
@@ -224,12 +169,8 @@
               </div>
             </div>
           </div>
-          <Sidebar
-            :votingStatus="votingStatus"
-            :voting-start-iso="votingStartIso ?? undefined"
-            :voting-end-iso="votingEndIso ?? undefined"
-            :mint="distributorInfo?.mint ?? undefined"
-          />
+          <Sidebar :votingStatus="votingStatus" :voting-start-iso="votingStartIso ?? undefined"
+            :voting-end-iso="votingEndIso ?? undefined" :mint="distributorInfo?.mint ?? undefined" />
         </div>
       </section>
     </div>
@@ -347,7 +288,7 @@ const eligibilityInfo = ref<EligibilityInfo | null>(null);
 const isEligible = computed(
   () =>
     !!eligibilityInfo.value &&
-    eligibilityInfo.value?.claimable_amount > 0 &&
+    eligibilityInfo.value?.end_amount > 0 &&
     !eligibilityLoading.value
 );
 
