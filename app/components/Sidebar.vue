@@ -5,36 +5,24 @@
         <span v-if="votingStatus !== 'ended'">Progress</span>
         <span v-else>Results</span>
       </h3>
-      <div
-        class="notification is-light mt-3 is-size-7"
-        style="background-color: #f5f5f5"
-        v-if="votingStatus !== 'ended'"
-      >
+      <div class="notification is-light mt-3 is-size-7" style="background-color: #f5f5f5"
+        v-if="votingStatus !== 'ended'">
         Vote distribution will be shown after the voting period closes.
       </div>
 
       <!-- if the current time is after the results published time & voting status is ended -->
-      <dl
-        class="results-summary is-size-7 mt-3"
-        v-if="votingStatus === 'ended'"
-      >
+      <dl class="results-summary is-size-7 mt-3" v-if="votingStatus === 'ended'">
         <p class="has-text-grey mb-2">Votes cast</p>
-        <div
-          class="vote-row is-flex is-justify-content-space-between mb-2"
-          :class="{
-            'vote-row--winner has-background-success-light':
-              winningChoice === 'yes',
-          }"
-        >
+        <div class="vote-row is-flex is-justify-content-space-between mb-2" :class="{
+          'vote-row--winner has-background-success-light':
+            winningChoice === 'yes',
+        }">
           <dt>Yes</dt>
           <dd class="has-text-weight-semibold">{{ yesVotesDisplay }}</dd>
         </div>
-        <div
-          class="vote-row is-flex is-justify-content-space-between"
-          :class="{
-            'vote-row--winner has-background-success-light': winningChoice === 'no',
-          }"
-        >
+        <div class="vote-row is-flex is-justify-content-space-between" :class="{
+          'vote-row--winner has-background-success-light': winningChoice === 'no',
+        }">
           <dt>No</dt>
           <dd class="has-text-weight-semibold">{{ noVotesDisplay }}</dd>
         </div>
@@ -42,15 +30,10 @@
     </div>
 
     <div class="box">
-      <div
-        class="is-flex is-justify-content-space-between is-align-items-center mb-5"
-      >
+      <div class="is-flex is-justify-content-space-between is-align-items-center mb-5">
         <h3 class="title is-5 mb-0">Status</h3>
         <span class="tag is-black is-capitalized">
-          <span
-            class="status-dot"
-            :class="`status-dot--${votingStatus}`"
-          ></span>
+          <span class="status-dot" :class="statusDotClass"></span>
           {{ votingStatus }}
         </span>
       </div>
@@ -125,6 +108,8 @@ const winningChoice = computed<"yes" | "no" | null>(() => {
   }
   return yesVotes.value > noVotes.value ? "yes" : "no";
 });
+
+const statusDotClass = computed(() => `status-dot--${props.votingStatus}`);
 
 async function fetchVoteTotals() {
   loadingVotes.value = true;
