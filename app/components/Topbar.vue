@@ -19,5 +19,5 @@
 </template>
 
 <script setup lang="ts">
-import { useWallet, WalletMultiButton } from "solana-wallets-vue";
+import { WalletMultiButton } from "solana-wallets-vue";
 </script>

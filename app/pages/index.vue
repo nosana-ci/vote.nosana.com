@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="container my-5">
-      <section class="section">
+    <section class="section my-5">
+      <div class="container">
         <div class="columns is-variable is-6">
           <div class="column is-8">
             <Intro />
@@ -172,8 +172,8 @@
           <Sidebar :votingStatus="votingStatus" :voting-start-iso="votingStartIso ?? undefined"
             :voting-end-iso="votingEndIso ?? undefined" :mint="distributorInfo?.mint ?? undefined" />
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </div>
 </template>
 
