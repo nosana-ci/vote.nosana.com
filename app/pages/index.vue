@@ -252,7 +252,6 @@ const votingStatus = computed(() => {
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
   const start = votingStartTimestamp.value;
   const end = votingEndTimestamp.value;
-  return "ended";
   if (start === null || end === null) {
     return "upcoming";
   }
