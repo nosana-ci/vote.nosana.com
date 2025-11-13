@@ -2,9 +2,7 @@
   <div class="app-wrapper">
     <Topbar />
     <main class="main-content">
-      <div class="container">
-        <h1 class="title is-4 mt-6">Coming soon...</h1>
-      </div>
+      <NuxtPage />
     </main>
     <Footer />
   </div>
