@@ -8,9 +8,9 @@
       <div id="navMenu" class="navbar-menu is-active">
         <div class="navbar-end">
           <div class="custom-wallet-button">
-            <ClientOnly>
+            <!-- <ClientOnly>
               <WalletMultiButton />
-            </ClientOnly>
+            </ClientOnly> -->
           </div>
         </div>
       </div>
