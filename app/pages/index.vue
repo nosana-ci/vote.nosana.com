@@ -253,7 +253,7 @@ const votingStatus = computed(() => {
   const start = votingStartTimestamp.value;
   const end = votingEndTimestamp.value;
   if (start === null || end === null) {
-    return "upcoming";
+    return "ended";
   }
   if (now < start) {
     return "upcoming";
